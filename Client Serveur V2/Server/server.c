@@ -43,6 +43,7 @@ static void app(void)
       int i = 0;
       FD_ZERO(&rdfs);
 
+
       /* add STDIN_FILENO */
       FD_SET(STDIN_FILENO, &rdfs);
 
@@ -81,7 +82,7 @@ static void app(void)
 
          /* after connecting the client sends its name */
          if(read_client(csock, buffer) == -1)
-         {
+         {  
             /* disconnected */
             continue;
          }
@@ -92,9 +93,22 @@ static void app(void)
          FD_SET(csock, &rdfs);
 
          Client c = { csock };
+
          strncpy(c.name, buffer, BUF_SIZE - 1);
          clients[actual] = c;
          actual++;
+
+         for(i = 0; i < actual-1; i++)
+         {
+            if (strcmp(c.name , clients[i].name) == 0) 
+            {
+               closesocket(clients[actual-1].sock);
+               remove_client(clients, actual-1, &actual);
+               strncpy(buffer, c.name, BUF_SIZE - 1);
+               strncat(buffer, " someone else tried to connect with your UserName", BUF_SIZE - strlen(buffer) - 1);
+               send_message_to_all_clients(clients, clients[actual], actual, buffer, 1);
+            }
+         }
       }
       else
       {
