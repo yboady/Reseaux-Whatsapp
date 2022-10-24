@@ -178,8 +178,10 @@ static void app(void)
 
                      send_private_message(clients, client, actual, nouveau_message, arg2, 0); 
 
-                  }else{
-                     printf("%s" , arg2);
+                  }else if(strcmp(cmd , "create") == 0){
+                     create_group(clients, client, actual, arg2);
+                  }else if(strcmp(cmd , "mg") == 0){
+                     send_message_to_group(clients, client, actual, nouveau_message, arg2, 0);
                   }
                   
 
@@ -253,6 +255,34 @@ static void send_private_message(Client *clients, Client sender, int actual, con
       }
    }
 }
+
+static void send_message_to_group(Client *clients, Client sender, int actual, const char *buffer, char *nomGroupe, char from_server)
+{
+   int i = 0;
+   char message[BUF_SIZE];
+   message[0] = 0;
+   for(int j = 0 ; j < nbGroupes ; j++){
+
+      if( strcmp(Groupes[j].nom,nomGroupe) == 0)
+      {
+
+         for (i = 0; i < Groupes[j].nombre; i++)
+         {
+            
+               if (from_server == 0)
+               {
+                  strncpy(message, sender.name, BUF_SIZE - 1);
+                  strncat(message, " : ", sizeof message - strlen(message) - 1);
+               }
+               strncat(message, buffer, sizeof message - strlen(message) - 1);
+               write_client(Groupes[j].membres[i].sock, message);
+         }
+      }
+
+   }
+
+}
+ 
 
 static void create_group(Client *clients, Client sender, int actual, char *NomGroupe)
 {
