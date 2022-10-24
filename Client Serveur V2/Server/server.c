@@ -6,6 +6,18 @@
 #include "server.h"
 #include "client.h"
 
+
+typedef struct
+{
+   char* nom;
+   Client membres [10];
+   int nombre;
+} Groupe;
+
+Groupe Groupes [10];
+nbGroupes = 0;
+
+
 enum {mp=1, create, join};
 
 static void init(void)
@@ -240,6 +252,23 @@ static void send_private_message(Client *clients, Client sender, int actual, con
          write_client(clients[i].sock, message);
       }
    }
+}
+
+static void create_group(Client *clients, Client sender, int actual, char *NomGroupe)
+{
+   if (nbGroupes < 10)
+   {
+      Groupe NouveauGroupe;
+      NouveauGroupe.membres[0] = sender;
+      NouveauGroupe.nom = NomGroupe;
+      NouveauGroupe.nombre = 1;
+      Groupes[nbGroupes - 1] = NouveauGroupe;
+   }
+   else
+   {
+      printf("Il ny a plus de groupes disponibles");
+   }
+   
 }
 
 static int init_connection(void)
