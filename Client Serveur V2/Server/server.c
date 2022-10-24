@@ -6,6 +6,8 @@
 #include "server.h"
 #include "client.h"
 
+enum {mp=1, create, join};
+
 static void init(void)
 {
 #ifdef WIN32
@@ -119,19 +121,23 @@ static void app(void)
             {
                Client client = clients[i];
                int c = read_client(clients[i].sock, buffer);
-               char *message = strchr(buffer, ' '); // " world";
-               char *cible;
-               if (message != NULL)
+               char *reste = strchr(buffer, ' '); // " world"
+               char *cmd;
+               char * arg2;
+               if (reste != NULL)
                {
-                  size_t lengthOfFirst = message - buffer;
-                  cible = (char *)malloc((lengthOfFirst + 1) * sizeof(char));
-                  strncpy(cible, buffer, lengthOfFirst); // "hello"
+                  size_t lengthOfFirst = reste - buffer;
+                  cmd = (char *)malloc((lengthOfFirst + 1) * sizeof(char));
+                  strncpy(cmd, buffer, lengthOfFirst); // "hello"
                } 
                else
                {
-                  printf("Usage : [destinataire][message]\n");
+                  printf("Usage : [destinataire][message] faute de copie\n");
                   continue;
                }
+
+               reste = reste + 1;
+
                /* client disconnected */
                if (c == 0)
                {
@@ -143,8 +149,30 @@ static void app(void)
                }
                else
                {
+                  
+                  char * nouveau_message = strchr(reste, ' '); // " world";
+                  if (nouveau_message != NULL)
+                  {
+                     size_t lengthOfSecond = nouveau_message - reste;
+                     arg2 = (char *)malloc((lengthOfSecond + 1) * sizeof(char));
+                     strncpy(arg2, reste, lengthOfSecond); // "hello"
+                  }else{
+                     continue;
+                  }
+
+                  
+                  if(strcmp(cmd , "mp") == 0)
+                  {
+
+                     send_private_message(clients, client, actual, nouveau_message, arg2, 0); 
+
+                  }else{
+                     printf("%s" , arg2);
+                  }
+                  
+
                   // send_message_to_all_clients(clients, client, actual, message, 0);
-                  send_private_message(clients, client, actual, message, cible, 0);
+                  //send_private_message(clients, client, actual, message, cible, 0);
                }
                break;
             }
