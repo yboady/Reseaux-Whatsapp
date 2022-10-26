@@ -178,37 +178,46 @@ static void app(void)
 
                   }
                   nouveau_message = nouveau_message + 1;
-                  printf("On avance quand même\n");
+                  
                   if(strcmp(cmd , "mp") == 0)
                   {  
-                     printf("Envoie d'un mp\n");
+                     printf("--------------------DEBUT du if \"mp\"\n");
                      send_private_message(clients, client, actual, nouveau_message, arg2, 0); 
+                     printf("[cmd] = %s\n" , cmd);
+                     printf("[message] = %s\n" , nouveau_message);
+                     printf("--------------------FIN du if \"mp\"\n");
 
                   }else if(strcmp(cmd , "create") == 0){
+                     printf("--------------------DEBUT du if \"create\"\n");
                      printf("%s\n" , cmd);
                      printf("%s\n" , nouveau_message);
                      printf("%d\n" , nbGroupes);
                      create_group(clients, client, actual, arg2 , nouveau_message);
-                     printf("Je suis aussi venu là\n");
+                     printf("[cmd] = %s\n" , cmd);
+                     printf("[message] = %s\n" , nouveau_message);
+                     printf("--------------------FIN du if \"create\"\n");
                   }else if(strcmp(cmd , "mg") == 0){
-
+                     printf("--------------------DEBUT du if \"mg\"\n");
                      send_message_to_group(clients, client, actual, nouveau_message, arg2, 0);
                      printf("Je suis dans l'envoie de message au groupe\n");
-                     printf("%s\n" , cmd);
-                     printf("%s\n" , nouveau_message);
+                     printf("[cmd] = %s\n" , cmd);
+                     printf("[message] = %s\n" , nouveau_message);
+                     printf("--------------------FIN du if \"mg\"\n");
                   }else if(strcmp(cmd , "join") == 0){
-
+                     printf("--------------------DEBUT du if \"join\"\n");
                      join_group(client , arg2 , nouveau_message);
                      printf("Je suis dans l'ajout au groupe\n");
-                     printf("%s\n" , cmd);
-                     printf("%s\n" , nouveau_message);
+                     printf("[cmd] = %s\n" , cmd);
+                     printf("[message] = %s\n" , nouveau_message);
+                     printf("--------------------FIN du if \"join\"\n");
                   }else if(strcmp(cmd , "loggroupe") == 0){
-
+                     printf("--------------------DEBUT du if \"loggroupe\"\n");
                      for (int l = 0 ; l < nbGroupes ; l++){
 
                         printf("Le groupe numéro [%d] a pour nom [%s] et pour mdp [%s]\n" , l , Groupes[l].nom , Groupes[l].mdp);
 
                      }
+                     printf("--------------------FIN du if \"loggroupe\"\n");
                   }else{
                      continue;
                   }
@@ -343,11 +352,9 @@ static void create_group(Client *clients, Client sender, int actual, char *NomGr
 
       //Passage par une copie de la chaîne de caractère afin d'éviter les problèmes liés à de la surcharge de pointeur
 
-      char buffer_temp[BUF_SIZE];
       strcpy(NouveauGroupe.nom , NomGroupe);
       //NouveauGroupe.nom = buffer_temp;
 
-      char buffer_temp2[BUF_SIZE];
       strcpy(NouveauGroupe.mdp , mdp);
       //NouveauGroupe.mdp = buffer_temp2 ; 
 
@@ -383,6 +390,7 @@ static void join_group(Client sender, char *NomGroupe , char* motDePasse)
 
             Groupes[i].membres[Groupes[i].nombre] = sender;
             Groupes[i].nombre++;
+            printf("Ajout réussi\n");
 
          }else{
 
