@@ -179,15 +179,45 @@ static void app(void)
                char *reste = strchr(buffer, ' '); // " world"
                char *cmd;
                char *arg2;
+
+               //On récupère le premier argument qui va nous servir de commande
+
                if (reste != NULL)
-               {
+               {  
                   size_t lengthOfFirst = reste - buffer;
                   cmd = (char *)malloc((lengthOfFirst + 1) * sizeof(char));
                   strncpy(cmd, buffer, lengthOfFirst); // "hello"
                }
                else
-               {
-                  write_client(clients[i].sock, "Usage : [cmd][nom][contenu] faute de copie\n");
+               {  
+
+                  //Si jamais la ligne de commande renseignée ne comporte qu'un seul argument
+
+                  if(strcmp(buffer , "quit") == 0){
+                     printf("--------------------DEBUT du if \"deco\"--------------------\n");
+                     printf("%s s'est déconnecté\n", client);
+                     closesocket(client.sock);
+                     remove_client(clients, i, &actual);
+                     
+                     FILE *f = NULL;
+                     f = fopen(client.name, "a+");
+                     fputs("-----", f);
+                     fputs("\n", f);
+                     fclose(f);
+                     printf("--------------------FIN du if \"deco\"--------------------\n");
+                  }else if(strcmp(buffer , "loggroupe") == 0){
+                     printf("--------------------DEBUT du if \"loggroupe\"--------------------\n");
+                     for (int l = 0; l < nbGroupes; l++)
+                     {
+
+                        printf("Le groupe numéro [%d] a pour nom [%s] et pour mdp [%s]\n", l, Groupes[l].nom, Groupes[l].mdp);
+                     }
+                     printf("--------------------FIN du if \"loggroupe\"--------------------\n");
+                  }
+
+                  //Si on ne reconnait pas l'argument alors on relance simplement la boucle
+
+                  //write_client(clients[i].sock, "Usage : [cmd][nom][contenu] faute de copie\n");
                   continue;
                }
 
@@ -205,7 +235,7 @@ static void app(void)
                else
                {
 
-                  char *nouveau_message = strchr(reste, ' '); // " world";
+                  char *nouveau_message = strchr(reste, ' '); // " world2";
                   // nouveau_message = nouveau_message + 1;
                   if (nouveau_message != NULL)
                   {
@@ -224,55 +254,55 @@ static void app(void)
 
                   if (strcmp(cmd, "mp") == 0)
                   {
-                     printf("--------------------DEBUT du if \"mp\"\n");
+                     printf("--------------------DEBUT du if \"mp\"--------------------\n");
                      send_private_message(clients, client, actual, nouveau_message, arg2, 0);
                      printf("[cmd] = %s\n", cmd);
                      printf("[message] = %s\n", nouveau_message);
-                     printf("--------------------FIN du if \"mp\"\n");
+                     printf("--------------------FIN du if \"mp\"--------------------\n");
                   }
                   else if (strcmp(cmd, "create") == 0)
                   {
-                     printf("--------------------DEBUT du if \"create\"\n");
+                     printf("--------------------DEBUT du if \"create\"--------------------\n");
                      printf("%s\n", cmd);
                      printf("%s\n", nouveau_message);
                      printf("%d\n", nbGroupes);
                      create_group(clients, client, actual, arg2, nouveau_message);
                      printf("[cmd] = %s\n", cmd);
                      printf("[message] = %s\n", nouveau_message);
-                     printf("--------------------FIN du if \"create\"\n");
+                     printf("--------------------FIN du if \"create\"--------------------\n");
                   }
                   else if (strcmp(cmd, "mg") == 0)
                   {
-                     printf("--------------------DEBUT du if \"mg\"\n");
+                     printf("--------------------DEBUT du if \"mg\"--------------------\n");
                      send_message_to_group(clients, client, actual, nouveau_message, arg2, 0);
                      printf("Je suis dans l'envoie de message au groupe\n");
                      printf("[cmd] = %s\n", cmd);
                      printf("[message] = %s\n", nouveau_message);
-                     printf("--------------------FIN du if \"mg\"\n");
+                     printf("--------------------FIN du if \"mg\"--------------------\n");
                   }
                   else if (strcmp(cmd, "join") == 0)
                   {
-                     printf("--------------------DEBUT du if \"join\"\n");
+                     printf("--------------------DEBUT du if \"join\"--------------------\n");
                      if (join_group(client, arg2, nouveau_message))
                         send_message_to_group(clients, client, actual, "Je viens de rejoindre la meute\n", arg2, 0);
                      printf("Je suis dans l'ajout au groupe\n");
                      printf("[cmd] = %s\n", cmd);
                      printf("[message] = %s\n", nouveau_message);
-                     printf("--------------------FIN du if \"join\"\n");
+                     printf("--------------------FIN du if \"join\"--------------------\n");
                   }
                   else if (strcmp(cmd, "loggroupe") == 0)
                   {
-                     printf("--------------------DEBUT du if \"loggroupe\"\n");
+                     printf("--------------------DEBUT du if \"loggroupe\"--------------------\n");
                      for (int l = 0; l < nbGroupes; l++)
                      {
 
                         printf("Le groupe numéro [%d] a pour nom [%s] et pour mdp [%s]\n", l, Groupes[l].nom, Groupes[l].mdp);
                      }
-                     printf("--------------------FIN du if \"loggroupe\"\n");
+                     printf("--------------------FIN du if \"loggroupe\"--------------------\n");
                   }
                   else if (strcmp(cmd, "deco") == 0)
                   {
-                     printf("--------------------DEBUT du if \"deco\"\n");
+                     printf("--------------------DEBUT du if \"deco\"--------------------\n");
 
                      closesocket(clients[i].sock);
                      remove_client(clients, i, &actual);
@@ -282,7 +312,7 @@ static void app(void)
                      fputs("-----", f);
                      fputs("\n", f);
                      fclose(f);
-                     printf("--------------------FIN du if \"deco\"\n");
+                     printf("--------------------FIN du if \"deco\"--------------------\n");
                   }
                   else
                   {
@@ -442,11 +472,11 @@ static void create_group(Client *clients, Client sender, int actual, char *NomGr
       Groupes[nbGroupes] = NouveauGroupe;
       nbGroupes++;
       printf("Un groupe vient de se créer avec comme nom %s et mdp %s\n", Groupes[nbGroupes - 1].nom, Groupes[nbGroupes - 1].mdp);
-      write_client(sender.sock, "La meute a été créée avec succès !\n");
+      write_client(sender.sock, "\"La meute a été créée avec succès !\"\n");
    }
    else
    {
-      printf("Il ny a plus de groupes disponibles\n");
+      printf("Il n'y a plus de groupes disponibles\n");
    }
 
    // free(NomGroupe);
