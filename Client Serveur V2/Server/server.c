@@ -310,7 +310,15 @@ static void send_message_to_group(Client *clients, Client sender, int actual, co
    for(int j = 0 ; j < nbGroupes ; j++){
 
       if( strcmp(Groupes[j].nom,nomGroupe) == 0)
-      {
+      {  
+
+         FILE* fichier = NULL;
+         fichier = fopen(nomGroupe , "a+");
+         fputs(sender.name , fichier);
+         fputs(" : " , fichier);
+         fputs(buffer , fichier);
+         fputs("\n" , fichier);
+         fclose(fichier);
 
          for (int k = 0; k < Groupes[j].nombre; k++)
          {  
@@ -319,16 +327,17 @@ static void send_message_to_group(Client *clients, Client sender, int actual, co
             {
                for (i = 0; i < Groupes[j].nombre; i++)
                {
-               
+                  
                   if (from_server == 0)
                   {  
-                     printf("Je suis dans la condition bizarre \n");
+                     printf("Je suis dans la condition \"from_server == 0\" \n");
                      strncpy(message, sender.name, BUF_SIZE - 1);
                      strncat(message, " : ", sizeof message - strlen(message) - 1);
                   }
-                  printf("Je suis dans la boucle d'envoie\n");
+                  printf("Je suis dans l'envoie d'un message groupé'\n");
                   strncat(message, buffer, sizeof message - strlen(message) - 1);
                   write_client(Groupes[j].membres[i].sock, message);
+                  
                }
             }
          }
