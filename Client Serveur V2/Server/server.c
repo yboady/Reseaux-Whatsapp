@@ -320,6 +320,8 @@ static void send_message_to_group(Client *clients, Client sender, int actual, co
          fputs("\n" , fichier);
          fclose(fichier);
 
+         
+
          for (int k = 0; k < Groupes[j].nombre; k++)
          {  
 
