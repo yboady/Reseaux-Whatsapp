@@ -242,9 +242,16 @@ static void app(void)
                         printf("Le groupe numéro [%d] a pour nom [%s] et pour mdp [%s]\n", l, Groupes[l].nom, Groupes[l].mdp);
                      }
                      printf("--------------------FIN du if \"loggroupe\"\n");
-                  }
-                  else
-                  {
+                  }else if(strcmp(cmd , "deco") == 0){
+                     printf("--------------------DEBUT du if \"deco\"\n");
+                     
+                     closesocket(clients[i].sock);
+                     remove_client(clients, i, &actual);
+                     printf("%s s'est déconnecté" , clients[i].name);
+                     fopen(clients[i].name , "w+");
+
+                     printf("--------------------FIN du if \"deco\"\n");
+                  }else{
                      continue;
                   }
 
