@@ -46,7 +46,7 @@ static void send_message_to_all_clients(Client *clients, Client client, int actu
 static void send_private_message(Client *clients, Client sender, int actual, const char *buffer, char *cible, char from_server);
 static void send_message_to_group(Client *clients, Client sender, int actual, const char *buffer, char *nomGroupe, char from_server);
 static void create_group(Client *clients, Client sender, int actual, char *NomGroupe , char * mdp);
-static void join_group(Client sender, char *NomGroupe , char * mdp);
+static int join_group(Client sender, char *NomGroupe , char * mdp);
 static void remove_client(Client *clients, int to_remove, int *actual);
 static void clear_clients(Client *clients, int actual);
 

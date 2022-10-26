@@ -114,7 +114,7 @@ static void app(void)
          strncpy(c.name, buffer, BUF_SIZE - 1);
          clients[actual] = c;
          actual++;
-
+         int usurpateur = 1;
          for (i = 0; i < actual - 1; i++)
          {
             if (strcmp(c.name, clients[i].name) == 0)
@@ -123,21 +123,27 @@ static void app(void)
                remove_client(clients, actual - 1, &actual);
                strncpy(buffer, c.name, BUF_SIZE - 1);
                strncat(buffer, " someone else tried to connect with your UserName", BUF_SIZE - strlen(buffer) - 1);
-               send_message_to_all_clients(clients, clients[actual], actual, buffer, 1);
+               write_client(clients[i].sock, buffer);
+               usurpateur = 0;
+               break;
             }
          }
-         /*Récupération historique*/
-         FILE *filePointer;
-         int bufferLength = 255;
-         char buffer[bufferLength];
-
-         if ((filePointer = fopen(c.name, "r")))
+         if (usurpateur)
          {
-            while (fgets(buffer, bufferLength, filePointer))
+            write_client(c.sock, "Vous êtes connecté à Whatsapp");
+            /*Récupération historique*/
+            FILE *filePointer;
+            int bufferLength = 255;
+            char buffer[bufferLength];
+
+            if ((filePointer = fopen(c.name, "r")))
             {
-               write_client(c.sock, buffer);
+               while (fgets(buffer, bufferLength, filePointer))
+               {
+                  write_client(c.sock, buffer);
+               }
+               fclose(filePointer);
             }
-            fclose(filePointer);
          }
       }
       else
@@ -161,7 +167,7 @@ static void app(void)
                }
                else
                {
-                  printf("Usage : [destinataire][message] faute de copie\n");
+                  write_client(clients[i].sock, "Usage : [cmd][nom][contenu] faute de copie\n");
                   continue;
                }
 
@@ -174,7 +180,7 @@ static void app(void)
                   remove_client(clients, i, &actual);
                   strncpy(buffer, client.name, BUF_SIZE - 1);
                   strncat(buffer, " disconnected !", BUF_SIZE - strlen(buffer) - 1);
-                  send_message_to_all_clients(clients, client, actual, buffer, 1);
+                  // send_message_to_all_clients(clients, client, actual, buffer, 1);
                }
                else
                {
@@ -227,7 +233,8 @@ static void app(void)
                   else if (strcmp(cmd, "join") == 0)
                   {
                      printf("--------------------DEBUT du if \"join\"\n");
-                     join_group(client, arg2, nouveau_message);
+                     if (join_group(client, arg2, nouveau_message))
+                        send_message_to_group(clients, client, actual, "Je viens de rejoindre la meute\n", arg2, 0);
                      printf("Je suis dans l'ajout au groupe\n");
                      printf("[cmd] = %s\n", cmd);
                      printf("[message] = %s\n", nouveau_message);
@@ -242,16 +249,19 @@ static void app(void)
                         printf("Le groupe numéro [%d] a pour nom [%s] et pour mdp [%s]\n", l, Groupes[l].nom, Groupes[l].mdp);
                      }
                      printf("--------------------FIN du if \"loggroupe\"\n");
-                  }else if(strcmp(cmd , "deco") == 0){
+                  }
+                  else if (strcmp(cmd, "deco") == 0)
+                  {
                      printf("--------------------DEBUT du if \"deco\"\n");
-                     
+
                      closesocket(clients[i].sock);
                      remove_client(clients, i, &actual);
-                     printf("%s s'est déconnecté" , clients[i].name);
-                     fopen(clients[i].name , "w+");
-
+                     printf("%s s'est déconnecté\n", clients[i].name);
+                     fclose(fopen(clients[i].name, "w+"));
                      printf("--------------------FIN du if \"deco\"\n");
-                  }else{
+                  }
+                  else
+                  {
                      continue;
                   }
 
@@ -352,7 +362,6 @@ static void send_message_to_group(Client *clients, Client sender, int actual, co
    printf("Je suis dans la méthode d'envoie au groupe\n");
    for (int j = 0; j < nbGroupes; j++)
    {
-
       if (strcmp(Groupes[j].nom, nomGroupe) == 0)
       {
          for (int k = 0; k < Groupes[j].nombre; k++)
@@ -364,7 +373,11 @@ static void send_message_to_group(Client *clients, Client sender, int actual, co
                {
                   if (strcmp(Groupes[j].membres[i].name, sender.name) != 0)
                   {
-                     write_client(Groupes[j].membres[i].sock, message);
+                     for (int p = 0; p < actual; p++)
+                     {
+                        if (strcmp(clients[p].name, Groupes[j].membres[i].name) == 0)
+                           write_client(Groupes[j].membres[i].sock, message);
+                     }
                      FILE *fichier = NULL;
                      fichier = fopen(Groupes[j].membres[i].name, "a+");
                      fputs(message, fichier);
@@ -405,6 +418,7 @@ static void create_group(Client *clients, Client sender, int actual, char *NomGr
       Groupes[nbGroupes] = NouveauGroupe;
       nbGroupes++;
       printf("Un groupe vient de se créer avec comme nom %s et mdp %s\n", Groupes[nbGroupes - 1].nom, Groupes[nbGroupes - 1].mdp);
+      write_client(sender.sock, "La meute a été créée avec succès !\n");
    }
    else
    {
@@ -415,7 +429,7 @@ static void create_group(Client *clients, Client sender, int actual, char *NomGr
    // free(mdp);
 }
 
-static void join_group(Client sender, char *NomGroupe, char *motDePasse)
+static int join_group(Client sender, char *NomGroupe, char *motDePasse)
 {
 
    printf("Je suis dans la méthode de rejoint de groupe\n");
@@ -434,17 +448,21 @@ static void join_group(Client sender, char *NomGroupe, char *motDePasse)
             Groupes[i].membres[Groupes[i].nombre] = sender;
             Groupes[i].nombre++;
             printf("Ajout réussi\n");
+            write_client(sender.sock, "Vous faites partie de la meute\n");
+            return 1;
          }
          else
          {
 
             printf("Trop de monde dans ce groupe\n");
+            return 0;
          }
       }
       else
       {
 
          printf("Aucun groupe à ce nom ou mdp faux\n");
+         return 0;
       }
    }
 }
