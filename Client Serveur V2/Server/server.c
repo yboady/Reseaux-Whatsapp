@@ -135,9 +135,29 @@ static void app(void)
             FILE *filePointer;
             int bufferLength = 255;
             char buffer[bufferLength];
+            char buffer2[bufferLength];
 
             if ((filePointer = fopen(c.name, "r")))
             {
+               
+               fseek(filePointer, -1, SEEK_END);
+               char courant;
+               int compteur = 0;
+               while(ftell(filePointer))
+               {
+                  courant = fgetc(filePointer);
+                  if (courant == '-')
+                  {
+                     compteur++;
+                  }
+                  else
+                  {
+                     compteur = 0;
+                  }
+                  fseek(filePointer, -2, SEEK_CUR);
+                  if (compteur == 5) break;
+               }
+
                while (fgets(buffer, bufferLength, filePointer))
                {
                   write_client(c.sock, buffer);
@@ -257,7 +277,11 @@ static void app(void)
                      closesocket(clients[i].sock);
                      remove_client(clients, i, &actual);
                      printf("%s s'est déconnecté\n", clients[i].name);
-                     fclose(fopen(clients[i].name, "w+"));
+                     FILE *f = NULL;
+                     f = fopen(clients[i].name, "a+");
+                     fputs("-----", f);
+                     fputs("\n", f);
+                     fclose(f);
                      printf("--------------------FIN du if \"deco\"\n");
                   }
                   else
@@ -455,16 +479,16 @@ static int join_group(Client sender, char *NomGroupe, char *motDePasse)
          {
 
             printf("Trop de monde dans ce groupe\n");
-            return 0;
          }
       }
       else
       {
 
          printf("Aucun groupe à ce nom ou mdp faux\n");
-         return 0;
       }
+
    }
+   return 0;
 }
 
 static int init_connection(void)
