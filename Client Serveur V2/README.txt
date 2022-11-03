@@ -20,6 +20,7 @@ gcc client.c -o client
 2. Pour se connecter en tant qu'utilisateur (client), lancer la commande suivante dans Client/
 ./client [IP du server] [identifiant]
 L'identifiant est un nom unique choisi par chaque utilisateur, c'est le nom qui sera perçu lorsqu'il enverra des message
+Si un autre client tente de se connecter en utilisant le même identifiant, l'accès a serveur lui est alors refusé et un message d'alerte est envoyé par le serveur.
 
 Pour ajouter d'autres utilisateurs, il suffit de lancer la commande 2. dans différents clients.
 
@@ -29,18 +30,19 @@ Pour ajouter d'autres utilisateurs, il suffit de lancer la commande 2. dans diff
 
 1. Envoyer un message privé 
 mp [destinataire] [contenu du message]
-Si le destinataire est connecté, il reçoit directement le message, sinon, il le verra à sa prochaine connexion
+Si le destinataire est connecté, il reçoit directement le message, sinon, il le verra à sa prochaine connexion.
 
 2. Créer un groupe
 create [nom du groupe] [mot de passe du groupe]
-Le créateur du groupe y est automatiquement ajouté et c'est alors le seul membre
+Le créateur du groupe y est automatiquement ajouté et c'est alors le seul membre.
 
 3. Rejoindre un groupe
 join [nom du groupe] [mot de passe du groupe]
+Si le mot de passe diffère de celui renseigné à la création du groupe alors l'accès au groupe n'est pas accordé. Dans le cas contraire le serveur envoie un message de bienvenue à tous les membres du groupe.
 
 4. Envoyer un message à un groupe
 mg [nom du groupe] [contenu du message]
-Si les destinataires sont connectés, ils reçoivent directement le message, sinon, ils le verront à leur prochaine connexion
+Si les destinataires sont connectés, ils reçoivent directement le message, sinon, ils le verront à leur prochaine connexion. Ne fonctionne seulement si l'utilisateur rentrant la commande est membre du groupe.
 
 5. Se déconnecter du server
 quit
